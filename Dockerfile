@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     git \
     vim \
     wget \
+    mariadb-server \
+    mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Set Python 3.10 as the default python version
@@ -34,11 +36,18 @@ RUN pip install gunicorn
 # Expose the port Gunicorn will listen on
 EXPOSE 8000
 
-# Copy the application inside container
-COPY application/ ./application
+# Expose the port MariaDB will run on
+EXPOSE 3306
+
+# Copy everything inside container
+WORKDIR /application
+COPY . .
 
 # Set WORKDIR
-WORKDIR /application
+WORKDIR /application/tracetech
+
+# Set the entrypoint
+ENTRYPOINT ["../entrypoint.sh"]
 
 # Start Gunicorn and serve the Django app
-CMD ["gunicorn", "application.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "tracetech.wsgi:application", "--bind", "0.0.0.0:8000"]
