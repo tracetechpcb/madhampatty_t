@@ -18,7 +18,7 @@ copy:
 
 # Run a container from a image for the first time
 run:
-	docker run -h ${HOSTNAME} --name ${CONTAINER_NAME} -d -p 8000:8000 -v /var/log:/var/log -v mysql_vol:/var/lib/mysql ${IMAGE_NAME}:${TAG}
+	docker run -h ${HOSTNAME} --name ${CONTAINER_NAME} -d -p 80:80 -p 8000:8000 -v mysql_vol:/var/lib/mysql ${IMAGE_NAME}:${TAG}
 
 # Start a stopped container
 start:copy

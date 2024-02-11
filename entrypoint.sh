@@ -3,18 +3,20 @@
 # Stop on error
 set -e
 
-export MYSQL_PASSWORD='tracetech'
-echo "MariaDB root password: $MYSQL_PASSWORD"
+# Demo License Key with 10 users and expiry on 01-01-2100
+LICENSE_KEY="ewogInVzZXJzIjogMTAsCiAiZXhwaXJ5X29uIjogIjAxLTAxLTIxMDAiCn0="
+#LICENSE_KEY="ewogInVzZXJzIjogMTAsCiAiZXhwaXJ5X29uIjogIjAxLTAxLTIxMDAiCn0=111111111111"
 
-# Store the output in a log
-exec > >(tee /var/log/entrypoint.log) 2>&1
+DB_ROOT_USER="root"
+DB_ROOT_PASSWORD="tracetech"
+DB_NAME="tracetech"
 
 # Execute additional scripts
 echo "Starting Default MariaDB Init Scripts"
-../mariadb_default_init.sh $MYSQL_PASSWORD
+../mariadb_default_init.sh $DB_ROOT_USER $DB_ROOT_PASSWORD $DB_NAME
 
 echo "Starting Custom MariaDB Init Scripts"
-../mariadb_custom_init.sh $MYSQL_PASSWORD
+../mariadb_custom_init.sh $DB_ROOT_USER $DB_ROOT_PASSWORD $DB_NAME $LICENSE_KEY
 
 # Then start your application
 exec "$@"

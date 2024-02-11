@@ -23,9 +23,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-=&(oj4^q5l0vfpjit*^p%lb#a#le750@@a7aa64($bu)14g)!n'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# SET DNS NAME / IP ADDRESSES FOR ACCESSING DJANGO APPLICATION
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    '192.168.147.128',
+    'www.tracetech.com'
+]
 
 
 # Application definition
@@ -37,6 +43,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'license.apps.LicenseConfig',
+    'login.apps.LoginConfig',
+    'user.apps.UserConfig',
+    'dashboard.apps.DashboardConfig',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +65,11 @@ ROOT_URLCONF = 'tracetech.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+                BASE_DIR / 'templates',
+                BASE_DIR / 'login' / 'templates',
+                BASE_DIR / 'dashboard' / 'templates'
+            ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,8 +90,12 @@ WSGI_APPLICATION = 'tracetech.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'tracetech', # Database Name
+        'USER': 'root', # Username
+        'PASSWORD': 'tracetech', # Password
+        'HOST': 'localhost',  # Or an IP address if your database is on a different server
+        'PORT': '3306',  # Default MariaDB port
     }
 }
 
@@ -117,7 +136,38 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    BASE_DIR / "dashboard" / "static",
+    # You can add more directories here
+]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# URL to which the application needs to be redirected when using is not logged in
+LOGIN_URL = '/login/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+# LOGGING SETTINGS
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
