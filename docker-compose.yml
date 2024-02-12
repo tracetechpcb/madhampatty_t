@@ -1,50 +1,55 @@
 version: '3.8'
 
 services:
-  db:
+  mariadb:
     build:
       context: .
       dockerfile: Dockerfile.mariadb
     image: img_mariadb:latest  # Custom image name with tag
-    container_name: mariadb # Custom container name
+    container_name: ${DB_CONTAINER_NAME} # Custom container name
     volumes:
       - db_volume:/var/lib/mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: tracetech
-      MYSQL_DATABASE: tracetech_db
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
 
   gunicorn:
     build:
       context: .
       dockerfile: Dockerfile.gunicorn
     image: img_gunicorn:latest  # Custom image name with tag
-    container_name: gunicorn # Custom container name
+    container_name: ${GUNICORN_CONTAINER_NAME} # Custom container name
     volumes:
       - static_volume:/app/tracetech/staticfiles
     # No need to expose Gunicorn port to the host, just to Nginx
     # ports:
     #   - "8000:8000"
     depends_on:
-      - db
+      - ${DB_SERVICE_NAME}
     environment:
-      - "DATABASE_URL=mysql://root:tracetech@db:3306/tracetech_db"
+      DATABASE_URL: mysql://${DB_ROOT_USER}:${DB_ROOT_PASSWORD}@${DB_SERVICE_NAME}:${DB_PORT}/${DB_NAME}
+      DB_ROOT_USER: ${DB_ROOT_USER}
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_CONTAINER_NAME: ${DB_CONTAINER_NAME}
+      DB_PORT: ${DB_PORT}
+      DEFAULT_APPLICATION_USERNAME: ${DEFAULT_APPLICATION_USERNAME}
+      DEFAULT_APPLICATION_PASSWORD: ${DEFAULT_APPLICATION_PASSWORD}
+      LICENSE_KEY: ${LICENSE_KEY}
 
   nginx:
     build:
       context: .
       dockerfile: Dockerfile.nginx
     image: img_nginx:latest  # Custom image name with tag
-    container_name: nginx # Custom container name
+    container_name: ${NGINX_CONTAINER_NAME} # Custom container name
     volumes:
       - static_volume:/usr/share/nginx/html/static
     ports:
       - "80:80"
     depends_on:
-      - gunicorn
-    # volumes:
-    #   - static_volume:/app/static
-    #   - media_volume:/app/media
+      - ${GUNICORN_SERVICE_NAME}
 
 
 
