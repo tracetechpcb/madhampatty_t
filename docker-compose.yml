@@ -21,7 +21,7 @@ services:
     image: img_gunicorn:latest  # Custom image name with tag
     container_name: ${GUNICORN_CONTAINER_NAME} # Custom container name
     volumes:
-      - static_volume:/app/tracetech/staticfiles
+      - static_volume:/app/gunicorn_app/staticfiles
     # No need to expose Gunicorn port to the host, just to Nginx
     # ports:
     #   - "8000:8000"
