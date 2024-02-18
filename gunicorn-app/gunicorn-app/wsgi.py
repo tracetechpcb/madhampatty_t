@@ -1,5 +1,5 @@
 """
-WSGI config for tracetech project.
+WSGI config for gunicorn-app project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tracetech.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gunicorn-app.settings')
 
 application = get_wsgi_application()

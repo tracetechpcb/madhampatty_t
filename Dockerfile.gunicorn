@@ -29,23 +29,15 @@ RUN apt-get update && apt-get install -y \
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1 \
     && update-alternatives --set python /usr/bin/python3.10
 
-# Set work directory
+
 WORKDIR /app
-
-# Copy project
-COPY . .
-
-# Add execution permission to .sh scripts
+COPY gunicorn-app .
+COPY startup-scripts/wait-for-it.sh .
 RUN chmod +x *.sh
 
 # Install dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Set work directory to django project folder
-WORKDIR /app/tracetech
 
-# Set the entrypoint.
-ENTRYPOINT ["../entrypoint.sh"]
-
-# Start Gunicorn
-CMD ["gunicorn", "tracetech.wsgi:application", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-"]
+# Make migrations and Start Gunicorn
+CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && gunicorn gunicorn-app.wsgi:application --bind 0.0.0.0:8000 --access-logfile - --error-logfile -"]

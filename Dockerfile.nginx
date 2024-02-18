@@ -1,11 +1,16 @@
 # Use the official Nginx image as the base image
 FROM nginx:alpine
 
-# Remove the default Nginx configuration file
-RUN rm /etc/nginx/conf.d/default.conf
+# Install openssl for generating self-signed certificate and bash
+RUN apk add --no-cache openssl bash
 
-# Copy the custom Nginx configuration file
-COPY nginx.conf /etc/nginx/conf.d
+# Create the directory for SSL certificates
+RUN mkdir -p /etc/nginx/ssl/
 
 # Expose port 80 to the Docker host
-EXPOSE 80
+EXPOSE 80 443
+
+# Copy wait-for-it.sh to check if services are up
+WORKDIR /app
+COPY startup-scripts/wait-for-it.sh .
+RUN chmod +x *.sh

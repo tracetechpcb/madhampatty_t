@@ -1,37 +1,34 @@
-# Define the image name and tag
-IMAGE_NAME=tracetech
-TAG=latest
-CONTAINER_NAME=tracetechcontainer
-HOSTNAME := $(shell hostname)
+DOCKER := docker
+DOCKER_COMPOSE := docker-compose
+PROJECT_NAME := tracetech
+TAR := tar
+TAR_FILE := $(PROJECT_NAME).tar
 
-# Build the Docker image
+# Targets
+.PHONY: build startup-script up start stop logs ps clean package
+
 build:
-	docker build -t $(IMAGE_NAME):$(TAG) --no-cache -f Dockerfile .
+	$(DOCKER_COMPOSE) -p $(PROJECT_NAME) build --no-cache
 
-# Copy necessary files to container to reflect any changes
-copy:
-	docker cp entrypoint.sh ${CONTAINER_NAME}:/application
-	docker cp mariadb_default_init.sh ${CONTAINER_NAME}:/application
-	docker cp mariadb_custom_init.sh ${CONTAINER_NAME}:/application
-	docker cp mariadb_upgrade_init.sh ${CONTAINER_NAME}:/application
-	docker cp tracetech/ ${CONTAINER_NAME}:/application
+startup-script:
+	./startup-scripts/main.sh ${PROJECT_NAME}
+	./startup-scripts/check-container.sh ${PROJECT_NAME}
 
-# Run a container from a image for the first time
-run:
-	docker run -h ${HOSTNAME} --name ${CONTAINER_NAME} -d -p 80:80 -p 8000:8000 -v mysql_vol:/var/lib/mysql ${IMAGE_NAME}:${TAG}
+up:
+	$(DOCKER_COMPOSE) -p $(PROJECT_NAME) up --remove-orphans -d
+	sleep 15
 
-# Start a stopped container
-start:copy
-	docker start ${CONTAINER_NAME}
+start: up startup-script
 
-# Stop a running container
 stop:
-	docker stop ${CONTAINER_NAME}
+	$(DOCKER_COMPOSE) -p $(PROJECT_NAME) down
 
-remove:
-	docker rm ${CONTAINER_NAME} || true
+logs:
+	$(DOCKER_COMPOSE) -p $(PROJECT_NAME) logs -f
 
-# Clean up (optional)
+ps:
+	$(DOCKER_COMPOSE) -p $(PROJECT_NAME) ps
+
 clean:
-	docker rmi $(IMAGE_NAME):$(TAG) || true
-
+	$(DOCKER_COMPOSE) -p $(PROJECT_NAME) down --rmi local
+	docker image prune -a

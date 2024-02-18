@@ -18,18 +18,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.gunicorn
-    image: img_gunicorn:latest  # Custom image name with tag
+    image: ${GUNICORN_IMAGE_NAME}:latest  # Custom image name with tag
     container_name: ${GUNICORN_CONTAINER_NAME} # Custom container name
-    volumes:
-      - static_volume:/app/tracetech/staticfiles
     # No need to expose Gunicorn port to the host, just to Nginx
     # ports:
     #   - "8000:8000"
     depends_on:
       - ${DB_SERVICE_NAME}
     environment:
-      DATABASE_URL: mysql://${DB_ROOT_USER}:${DB_ROOT_PASSWORD}@${DB_SERVICE_NAME}:${DB_PORT}/${DB_NAME}
-      DB_ROOT_USER: ${DB_ROOT_USER}
+      DATABASE_URL: mysql://${DB_ROOT_USERNAME}:${DB_ROOT_PASSWORD}@${DB_SERVICE_NAME}:${DB_PORT}/${DB_NAME}
+      DB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
       DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       DB_NAME: ${DB_NAME}
       DB_CONTAINER_NAME: ${DB_CONTAINER_NAME}
@@ -42,19 +40,36 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.nginx
-    image: img_nginx:latest  # Custom image name with tag
+    image: ${NGINX_IMAGE_NAME}:latest  # Custom image name with tag
     container_name: ${NGINX_CONTAINER_NAME} # Custom container name
     volumes:
-      - static_volume:/usr/share/nginx/html/static
+      - nginx_volume:/usr/share/nginx/html
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - ${GUNICORN_SERVICE_NAME}
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME}
 
+
+  react:
+    build:
+      context: .
+      dockerfile: Dockerfile.react  # You need to create this Dockerfile
+    image: ${REACT_IMAGE_NAME}:latest
+    container_name: ${REACT_CONTAINER_NAME}
+    volumes:
+      - nginx_volume:/usr/share/nginx/html  # Serve your static files from here
+    # No need to expose react port since file is servered by nginx
+    # ports:
+    #   - "3000:80"
+    depends_on:
+      - ${NGINX_SERVICE_NAME}
 
 
 volumes:
   db_volume:
     name: db_volume
-  static_volume:
-    name: static_volume
+  nginx_volume:
+    name: nginx_volume
