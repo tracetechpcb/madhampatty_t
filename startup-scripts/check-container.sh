@@ -8,7 +8,7 @@ set -e
 source .env
 
 # List of required containers
-required_containers=("$DB_CONTAINER_NAME" "$NGINX_CONTAINER_NAME" "$GUNICORN_CONTAINER_NAME" "$REACT_CONTAINER_NAME")
+required_containers=("$MARIADB_CONTAINER_NAME" "$MONGODB_CONTAINER_NAME" "$NGINX_CONTAINER_NAME" "$GUNICORN_CONTAINER_NAME" "$REACT_CONTAINER_NAME")
 
 # Function to check if a container is up
 is_container_up() {

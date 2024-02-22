@@ -13,8 +13,14 @@ if [ -z "$DOMAIN_NAME" ]; then
     exit 1
 fi
 
-# Command to generate the self-signed certificate inside the container
-docker exec $NGINX_CONTAINER_NAME openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "/etc/nginx/ssl/self-signed.key" -out "/etc/nginx/ssl/self-signed.crt" -subj "/C=US/ST=YourState/L=YourCity/O=YourOrganization/OU=YourUnit/CN=$DOMAIN_NAME" || { echo "Failed to generate Self-signed cerificate for $DOMAON_NAME"; exit 1; }
+# Check if both variables are unset or set to empty strings
+if [[ -z "$SSL_CERTIFICATE_PATH" ]] || [[ -z "$SSL_CERTIFICATE_KEY_PATH" ]]; then
+    # Command to generate the self-signed certificate inside the container
+    docker exec $NGINX_CONTAINER_NAME openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "/etc/nginx/ssl/signed.key" -out "/etc/nginx/ssl/signed.crt" -subj "/C=US/ST=YourState/L=YourCity/O=YourOrganization/OU=YourUnit/CN=$DOMAIN_NAME" || { echo "Failed to generate Self-signed cerificate for $DOMAON_NAME"; exit 1; }
+else
+    docker cp $CCL_CERTIFICATE_PATH $NGINX_CONTAINER_NAME:/etc/nginx/ssl/signed.crt || { echo "Failed to copy provided ssl certificate"; exit 1; }
+    docker cp $CCL_CERTIFICATE_KEY_PATH $NGINX_CONTAINER_NAME:/etc/nginx/ssl/signed.key || { echo "Failed to copy provided ssl certificate key"; exit 1; }
+fi
 
 # Remove default nginx config file
 docker exec $NGINX_CONTAINER_NAME rm -f /etc/nginx/conf.d/default.conf || { echo "Failed to remove default Nginx configuration"; exit 1; }

@@ -31,9 +31,10 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1 \
 
 
 WORKDIR /app
-COPY gunicorn-app .
 COPY startup-scripts/wait-for-it.sh .
 RUN chmod +x *.sh
+COPY gunicorn-app .
+
 
 # Install dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt

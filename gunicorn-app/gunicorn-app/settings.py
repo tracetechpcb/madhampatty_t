@@ -54,8 +54,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
 
-    'startup.apps.StartupConfig',
+    # Apps are intialized based on the order. Always initialize DB first followed by other apps
+    'mariadb.apps.MariadbConfig',
+    'mongodb.apps.MongodbConfig',
+    # Once DB is ready, initialize license
     'license.apps.LicenseConfig',
+
+    'employee.apps.EmployeeConfig',
 ]
 
 MIDDLEWARE = [
@@ -102,7 +107,7 @@ DATABASES = {
 }
 
 # Override the default DATABASES config with DATABASE_URL environment variable
-DATABASE_URL = os.getenv('DATABASE_URL', '')  # Get DATABASE_URL from the environment
+DATABASE_URL = os.getenv('MARIADB_DATABASE_URL', '')  # Get DATABASE_URL from the environment
 if DATABASE_URL:
     DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
 
@@ -182,14 +187,8 @@ REST_FRAMEWORK = {
 
 # JWT Token settings
 SIMPLE_JWT = {
-    # ACCESS TOKENS NEED TO BE MANUALLY REFRESHED
-    #'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    #'REFRESH_TOKEN_LIFETIME': timedelta(hours=1),
-
-    # SLIDING TOKENS AUTOMATICALLY EXTEND EXP AS LONG AS IN USE
-    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=15),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(hours=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(hours=1),
 
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
