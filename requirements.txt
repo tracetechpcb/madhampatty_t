@@ -1,0 +1,10 @@
+jinja2
+pyyaml
+tzdata
+Django==5.0.2
+django-cors-headers
+dj-database-url==0.5.0
+djangorestframework
+djangorestframework-simplejwt
+pymongo
+pydantic

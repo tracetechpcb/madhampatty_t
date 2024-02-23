@@ -1,0 +1,84 @@
+services:
+    infrastructure_services:
+    -   service_name: nginx-service
+        image_name: img-nginx-service
+        container_name: nginx-service
+        volumes:
+        -   nginx_volume:/usr/share/nginx/html
+        exposed_ports:
+        -   80:80
+        -   443:443
+        restart: always
+        environment: {}
+        dockerfile: ./nginx-service/Dockerfile
+
+    -   service_name: mariadb-service
+        service_port: 3306
+        image_name: img-mariadb-service
+        container_name: mariadb-service
+        volumes:
+        -   mariadb_volume:/var/lib/mysql
+        restart: always
+        environment: {}
+        dockerfile: ./mariadb-service/Dockerfile
+        db_name: tracetech_db
+        root_username: root
+        root_password: tracetech
+
+    -   service_name: mongodb-service
+        service_port: 27017
+        image_name: img-mongodb-service
+        container_name: mongodb-service
+        volumes:
+        -   mongodb_volume:/data/db
+        restart: always
+        environment: {}
+        command: mongod --auth
+        dockerfile: ./mongodb-service/Dockerfile
+        db_name: tracetech_db
+        root_username: root
+        root_password: tracetech
+        auth_source: admin
+
+    application_services:
+    -   service_name: authentication-service
+        service_port: 8000
+        image_name: img-authentication-service
+        container_name: authentication-service
+        restart: always
+        depends_on:
+        -   mariadb-service
+        -   mongodb-service
+        environment: {}
+        dockerfile: ./authentication_service/Dockerfile
+        api: /api/authentication/
+        nginx_upstream: 'authentication_service'
+
+    -   service_name: license-service
+        service_port: 8000
+        image_name: img-license-service
+        container_name: license-service
+        restart: always
+        depends_on:
+        -   authentication-service
+        environment: {}
+        dockerfile: ./license_service/Dockerfile
+        api: /api/license/
+        nginx_upstream: 'license_service'
+
+    # -   service_name: user-mgmt-service
+    #     service_port: 8000
+    #     image_name: img-user-mgmt-service
+    #     container_name: user-mgmt-service
+    #     api: /api/user/
+
+    # -   service_name: event-mgmt-service
+    #     service_port: 8000
+    #     image_name: img-event-mgmt-service
+    #     container_name: event-mgmt-service
+    #     api: /api/event/
+
+volumes:
+-   nginx_volume
+-   mariadb_volume
+-   mongodb_volume

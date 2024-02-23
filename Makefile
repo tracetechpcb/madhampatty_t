@@ -4,21 +4,35 @@ PROJECT_NAME := tracetech
 TAR := tar
 PACKAGE_FOLDER := package
 
-# Targets
-.PHONY: build startup-script up start stop logs ps clean package
 
-build:
+# Build target has 'pre-build' stage followed by actual build followed by 'post-puild' stage
+build: pre-build docker-compose-build post-build
+
+pre-build:
+	python3 ./pre-build.py
+	python3 ./nginx-service/pre-build.py
+
+docker-compose-build:
 	$(DOCKER_COMPOSE) -p $(PROJECT_NAME) build --no-cache
 
-startup-script:
-	sleep 15
-	./startup-scripts/main.sh ${PROJECT_NAME}
+post-build:
+	python3 ./nginx-service/post-build.py
 
-up:
+
+# Start target has 'pre-start' stage followed by actual start followed by 'post-start' stage
+start: pre-start docker-compose-up post-start
+
+pre-start:
+	:
+
+docker-compose-up:
 	$(DOCKER_COMPOSE) -p $(PROJECT_NAME) up --remove-orphans -d
 
-start: up startup-script
+post-start:
+	:
 
+
+# Other targets
 stop:
 	$(DOCKER_COMPOSE) -p $(PROJECT_NAME) down
 
@@ -32,6 +46,8 @@ clean:
 	$(DOCKER_COMPOSE) -p $(PROJECT_NAME) down --rmi local
 	docker image prune -a
 
+
+# Targets related to builing tar package and deploying them
 package: build
 	mkdir -p $(PACKAGE_FOLDER)
 	${DOCKER} save -o $(PACKAGE_FOLDER)/img_mariadb.tar img_mariadb

@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  {%- for infrastructure_service in infrastructure_services %}
+  {{ infrastructure_service.service_name }}:
+    build:
+      context: .
+      dockerfile: {{ infrastructure_service.dockerfile }}
+    image: {{ infrastructure_service.image_name }}:latest
+    container_name: {{ infrastructure_service.container_name }}
+    {%- if infrastructure_service.volumes %}
+    volumes:
+    {%- for volume in infrastructure_service.volumes %}
+      - {{ volume }}
+    {%- endfor %}
+    {%- endif %}
+    {%- if infrastructure_service.exposed_ports %}
+    ports:
+    {%- for port in infrastructure_service.exposed_ports %}
+      - {{ port }}
+    {%- endfor %}
+    {%- endif %}
+    restart: {{ infrastructure_service.restart }}
+    {%- if infrastructure_service.environment %}
+    environment: {{ infrastructure_service.environment }}
+    {%- endif %}
+    {%- if infrastructure_service.command %}
+    command: {{ infrastructure_service.command }}
+    {%- endif %}
+  {%- endfor %}
+
+  {%- for application_service in application_services %}
+  {{ application_service.service_name }}:
+    build:
+      context: .
+      dockerfile: {{ application_service.dockerfile }}
+    image: {{ application_service.image_name }}:latest
+    container_name: {{ application_service.container_name }}
+    {%- if application_service.depends_on %}
+    depends_on:
+    {%- for service in application_service.depends_on %}
+      - {{ service }}
+    {%- endfor %}
+    {%- endif %}
+    {%- if application_service.volumes %}
+    volumes:
+    {%- for volume in application_service.volumes %}
+      - {{ volume.volume_name }}:{{ volume.mount_path}}
+    {%- endfor %}
+    {%- endif %}
+    {%- if application_service.exposed_ports %}
+    ports:
+    {%- for port in application_service.exposed_ports %}
+      - {{ port }}
+    {%- endfor %}
+    {%- endif %}
+    restart: always
+    {%- if application_service.environment %}
+    environment: {{ application_service.environment }}
+    {%- endif %}
+    {%- if application_service.command %}
+    command: {{ application_service.command }}
+    {%- endif %}
+  {%- endfor %}
+
+volumes:
+  {%- for volume in volumes %}
+  {{ volume }}:
+    name: {{ volume }}
+  {%- endfor %}

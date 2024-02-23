@@ -1,0 +1,42 @@
+# Use Ubuntu 22.04 LTS as the base image
+FROM ubuntu:22.04
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Update the package repository and install basic packages
+RUN apt-get update && apt-get install -y \
+    python3.10 \
+    python3.10-venv \
+    python3.10-dev \
+    python3-pip \
+    build-essential \
+    curl \
+    make \
+    git \
+    vim \
+    wget \
+    pkg-config \
+    # client to execute mysql client queries from CLI
+    mysql-client \
+    # Without this pip isntall mysqlclient fails
+    libmariadb-dev \
+    libmariadb-dev-compat \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Python 3.10 as the default python version
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1 \
+    && update-alternatives --set python /usr/bin/python3.10
+
+
+WORKDIR /app
+COPY ../license_service .
+COPY ../vendor vendor
+
+# Install dependencies
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+
+# Make migrations and Start Gunicorn
+CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && gunicorn license_service.wsgi:application --bind 0.0.0.0:8000 --access-logfile - --error-logfile -"]

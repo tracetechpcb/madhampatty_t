@@ -1,0 +1,15 @@
+# MANDATORY; Default login into the application
+default_application_username: admin@tracetech.com
+default_application_password: admin123A!!
+default_application_email: admin@tracetech.com
+
+# MANDATORY; Domain name where the application is hosted.
+# include www. in domain name
+domain_name: www.tracetech.com
+
+# MANDATORY; Demo License Key with 10 users and expiry on 01-01-2100
+license_key: ewogInVzZXJzIjogMTAsCiAiZXhwaXJ5X29uIjogIjAxLTAxLTIxMDAiCn0="
+
+# OPTIONAL; ssl_certificate_path & ssl_certificate_key_path are optional. If not defined, we will generate self-signed certificate
+ssl_certificate_path: ""
+ssl_certificate_key_path: ""

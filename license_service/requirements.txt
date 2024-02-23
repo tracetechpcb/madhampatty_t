@@ -1,0 +1,10 @@
+tzdata
+Django==5.0.2
+gunicorn
+django-cors-headers
+mysqlclient
+dj-database-url==0.5.0
+djangorestframework
+djangorestframework-simplejwt
+pymongo
+pydantic
